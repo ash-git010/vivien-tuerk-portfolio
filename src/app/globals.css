@@ -1,26 +1,262 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ---------------------------------------------------------------------------
+   Fonts are injected by next/font in layout.tsx as --font-cormorant / --font-jost.
+   Declared `inline` so the utilities resolve to the next/font variables directly.
+--------------------------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-cormorant);
+  --font-sans: var(--font-jost);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ---------------------------------------------------------------------------
+   Brand palette. The first block is the identity carried over from the PDF.
+   gold-ink and meta are additions: `gold` on cream measures 2.32:1 and `muted`
+   on cream measures 2.90:1, both of which fail WCAG AA for text. They are used
+   for TEXT on light surfaces only. Decorative gold (rules, diamonds, borders)
+   stays #C0A063 exactly as specified.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-navy: #101e33;
+  --color-navy-soft: #1a2b45;
+  --color-navy-deep: #0a1424;
+  --color-cream: #fbf8f3;
+  --color-cream-warm: #f3ede3;
+  --color-gold: #c0a063;
+  --color-gold-light: #d8c395;
+  --color-gold-soft: #ede3d0;
+  --color-gold-ink: #83642a;
+  --color-ink: #182437;
+  --color-body: #41505f;
+  --color-muted: #8a93a0;
+  --color-meta: #616a75;
+  --color-hairline: #dfd6c7;
+
+  --spacing-section: clamp(5rem, 9vw, 8.5rem);
+  --spacing-section-tight: clamp(3.5rem, 6vw, 5rem);
+  --spacing-gutter: clamp(1.25rem, 4vw, 4rem);
+
+  --radius-card: 2px;
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Anchor targets must clear the sticky header. */
+  section[id] {
+    scroll-margin-top: 84px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-soft);
+    color: var(--color-ink);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------------------------------------------------------------------------
+   Type scale. Every recurring text role is named here so the scale stays
+   auditable in one file instead of being scattered across components.
+--------------------------------------------------------------------------- */
+@layer components {
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.28em;
+    line-height: 1;
+    text-transform: uppercase;
+    /* cancels the trailing letterspace so centred/flush-left text sits true */
+    margin-inline-end: -0.28em;
+  }
+
+  .display-name {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2.5rem, 8vw, 6.5rem);
+    letter-spacing: 0.15em;
+    line-height: 1;
+    text-transform: uppercase;
+    margin-inline-end: -0.15em;
+  }
+
+  .section-heading {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.875rem, 4.2vw, 3.375rem);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .section-heading em {
+    font-style: italic;
+    letter-spacing: -0.005em;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.375rem;
+    letter-spacing: 0.005em;
+    line-height: 1.2;
+  }
+
+  .tagline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  /* Jost 300 is never used below 18px: its hairlines break down on greyscale AA. */
+  .lede {
+    font-weight: 300;
+    font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+    line-height: 1.5;
+  }
+
+  /* 17px, not 16: Jost's x-height runs small for a geometric sans. */
+  .body-text {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    letter-spacing: 0.005em;
+  }
+
+  @media (min-width: 768px) {
+    .body-text {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* Service bullets: 16px on mobile, 15px on desktop. Deliberately inverted.
+     On a phone these bullets are the content answering "what can she take off
+     my plate", so they must not be the smallest text on the page. */
+  .bullet-text {
+    font-size: 1rem;
+    line-height: 1.55;
+    letter-spacing: 0.005em;
+  }
+
+  @media (min-width: 1024px) {
+    .bullet-text {
+      font-size: 0.9375rem;
+    }
+  }
+
+  .label-caps {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    margin-inline-end: -0.1em;
+  }
+
+  .meta-text {
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    line-height: 1.5;
+  }
+
+  /* Decorative 01/02/03. Ornament, not sequence: always aria-hidden. */
+  .ornament {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+    font-variant-numeric: oldstyle-nums;
+    line-height: 1;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    padding: 1.0625rem 1.75rem 0.9375rem;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    transition:
+      background-color 250ms var(--ease-editorial),
+      border-color 250ms var(--ease-editorial),
+      color 250ms var(--ease-editorial);
+  }
+
+  .btn-primary {
+    background-color: var(--color-gold);
+    border-color: var(--color-gold);
+    color: var(--color-navy-deep);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-gold-light);
+    border-color: var(--color-gold-light);
+  }
+
+  .btn-ghost-dark {
+    border-color: color-mix(in oklab, var(--color-gold-light) 55%, transparent);
+    color: var(--color-gold-light);
+  }
+
+  .btn-ghost-dark:hover {
+    border-color: var(--color-gold-light);
+    background-color: color-mix(in oklab, var(--color-gold-light) 8%, transparent);
+  }
+
+  .btn-ghost-light {
+    border-color: var(--color-gold);
+    color: var(--color-gold-ink);
+  }
+
+  .btn-ghost-light:hover {
+    background-color: var(--color-gold-soft);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hard requirement: under reduced motion every reveal resolves immediately and
+   only opacity is allowed to transition. Components also branch on
+   useReducedMotion() so motion never sets a transform in the first place.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
