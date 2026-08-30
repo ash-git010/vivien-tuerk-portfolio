@@ -22,13 +22,25 @@ export const meta = {
   url: "https://vivien-tuerk.de",
 } as const;
 
+/**
+ * Split out so the postal code and the locality exist exactly once. `city` is
+ * the display form and is composed from them; the structured-data address in
+ * the root layout needs the two halves separately.
+ */
+const postalCode = "55218";
+const locality = "Ingelheim am Rhein";
+
 export const contact = {
   phone: "+49 1522 9591655",
+  /** E.164, no spaces. For tel: hrefs and schema.org, never for display. */
+  phoneE164: "+4915229591655",
   phoneHref: "tel:+4915229591655",
   email: "vivien.tuerk9@gmail.com",
   emailHref: "mailto:vivien.tuerk9@gmail.com",
   street: "Binger Str. 249",
-  city: "55218 Ingelheim am Rhein",
+  postalCode,
+  locality,
+  city: `${postalCode} ${locality}`,
   region: "Rhein-Main-Gebiet",
   linkedinLabel: "linkedin.com/in/vivien-türk-ab2623316",
   linkedinHref: "https://www.linkedin.com/in/vivien-t%C3%BCrk-ab2623316",
@@ -275,6 +287,15 @@ export const footer = {
   ],
 } as const;
 
+/**
+ * 404. German and on brand: the Next.js default is an English white page.
+ */
+export const notFound = {
+  code: "404",
+  title: "Diese Seite gibt es nicht.",
+  text: "Der Link ist womöglich veraltet oder enthält einen Tippfehler. Über die Startseite finden Sie alles Weitere.",
+} as const;
+
 export const images = {
   portrait: {
     src: "/vivien-portrait.jpg",
@@ -307,11 +328,12 @@ export const ui = {
  * Legal pages. Required for a German business site: Impressum under § 5 DDG,
  * Datenschutzerklärung under DSGVO.
  *
- * TWO THINGS ASH MUST CONFIRM WITH VIVIEN BEFORE LAUNCH:
- *   1. USt-IdNr. If she has one it is mandatory here. If she runs under the
- *      Kleinunternehmerregelung, there is nothing to add and this is fine.
- *   2. The Impressum publishes her home address to a crawlable page. The PDF
- *      already carried it, but a PDF is not indexed by Google and this is.
+ * Both pre-launch questions are settled, confirmed with Vivien:
+ *   1. She has no USt-IdNr., so no VAT line belongs here. Note this is not the
+ *      same as claiming the Kleinunternehmerregelung: she did not say that, so
+ *      no § 19 UStG statement goes on the page.
+ *   2. She approved publishing her home address on a crawlable page, knowing
+ *      the PDF was never indexed by Google and this is.
  * ------------------------------------------------------------------------- */
 export const impressum = {
   title: "Impressum",
